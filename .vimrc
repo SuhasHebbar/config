@@ -4,7 +4,7 @@ call plug#begin()
 
 Plug 'Valloric/YouCompleteMe'
 " Plug 'vim-syntastic/syntastic'
-Plug '/usr/local/opt/fzf'
+Plug '~/local/fzf/bin/fzf'
 Plug 'junegunn/fzf.vim'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
@@ -40,7 +40,9 @@ highlight ColorColumn ctermbg=darkgray
 
 " YouCompleteMe
 " Change python interpreter used by vim
-" let g:ycm_python_binary_path='~/.vim/venv/bin/python'
+let g:ycm_python_binary_path='~/.vim/venv/bin/python'
+" Close autocomplete window after autocomplete suggestion is inserted
+let g:ycm_autoclose_preview_window_after_completion = 1
 " let g:ycm_filetype_specific_completion_to_disable = {
 "       \ 'python': 1
 "       \}
@@ -78,5 +80,13 @@ inoremap <C-t>     <Esc>:tabnew<CR>
 set ttimeoutlen=100
 
 
-highlight ALEError ctermbg=none cterm=underline
-highlight ALEWarning ctermbg=none cterm=underline
+" Remove underlining of errors by ALE
+" highlight ALEError ctermbg=none cterm=underline
+" highlight ALEWarning ctermbg=none cterm=underline
+
+" ale
+" Set this in your vimrc file to disabling highlighting
+let g:ale_set_highlights = 0
+
+" change default pyls executable
+let g:ale_python_pyls_executable = $HOME . '/.vim/bin/ale_pyls'

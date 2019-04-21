@@ -1,0 +1,4 @@
+#!/bin/bash
+source $HOME/.vim/venv/bin/activate
+pyls $@
+deactivate
