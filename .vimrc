@@ -37,6 +37,7 @@ set softtabstop=2
 set shiftwidth=2
 set expandtab
 highlight ColorColumn ctermbg=darkgray
+set colorcolumn=80
 
 " YouCompleteMe
 " Change python interpreter used by vim
@@ -90,3 +91,5 @@ let g:ale_set_highlights = 0
 
 " change default pyls executable
 let g:ale_python_pyls_executable = $HOME . '/.vim/bin/ale_pyls'
+
+
