@@ -3,8 +3,12 @@ set nocompatible
 call plug#begin()
 
 Plug 'Valloric/YouCompleteMe'
-" Plug 'vim-syntastic/syntastic'
-Plug '~/local/fzf/bin/fzf'
+
+" PlugInstall and PlugUpdate will clone fzf in ~/.fzf and run the install script
+Plug 'junegunn/fzf', { 'dir': '~/.fzf', 'do': './install --all' }
+" Both options are optional. You don't have to install fzf in ~/.fzf
+" and you don't have to run the install script if you use fzf only in Vim.
+
 Plug 'junegunn/fzf.vim'
 Plug 'tpope/vim-commentary'
 Plug 'tpope/vim-fugitive'
