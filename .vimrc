@@ -39,6 +39,9 @@ set expandtab
 highlight ColorColumn ctermbg=darkgray
 set colorcolumn=80
 
+" Enable Backspace indentation and newline
+set backspace=indent,eol,start
+
 " YouCompleteMe
 " Change python interpreter used by vim
 let g:ycm_python_binary_path='~/.vim/venv/bin/python'
