@@ -4,7 +4,7 @@ project_root=$(git rev-parse --show-toplevel)
 project_url=$(git config --get remote.origin.url)
 
 if [[ "$project_url" \
-  =~ ^(https://|git@)github.com/SuhasHebbar/vim-config((.git)?)$ ]]
+  =~ ^(https://|git@)github.com(/|:)SuhasHebbar/vim-config((.git)?)$ ]]
 then
   rsync -avh --delete $project_root/bin/ $HOME/.vim/bin
   rsync -avh --delete $project_root/ftplugin/ $HOME/.vim/ftplugin

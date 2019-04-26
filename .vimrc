@@ -43,6 +43,9 @@ set expandtab
 highlight ColorColumn ctermbg=darkgray
 set colorcolumn=80
 
+" Highlight search results
+set hlsearch
+
 " Enable Backspace indentation and newline
 set backspace=indent,eol,start
 
