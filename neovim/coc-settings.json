@@ -1,0 +1,5 @@
+{
+  "coc.preferences.extensionUpdateCheck": "never",
+  "python.linting.enabled": false,
+  "python.pythonPath": "/home/suhas/.vim/venv/bin/python"
+}
