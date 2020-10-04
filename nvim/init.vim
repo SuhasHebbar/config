@@ -1,3 +1,12 @@
+let autoload_location = stdpath('data') .. '/site/autoload/plug.vim'
+let vim_plug_command = '!curl -fLo ' .. autoload_location .. 
+			\' --create-dirs https://raw.githubusercontent.com/junegunn/vim-plug/master/plug.vim'
+
+if empty(glob(autoload_location))
+  silent exec vim_plug_command
+  autocmd VimEnter * PlugInstall --sync | source $MYVIMRC
+endif
+
 call plug#begin(stdpath('data') . '/plugged')
 
 " Provides commenting support.
