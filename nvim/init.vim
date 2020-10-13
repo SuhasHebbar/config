@@ -20,6 +20,8 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 
 Plug 'nvim-treesitter/nvim-treesitter'
 
+" Plug 'neovim/nvim-lspconfig'
+
 call plug#end()
 
 set shell=/bin/bash
@@ -78,19 +80,13 @@ map <C-b> :NERDTreeToggle<CR>
 
 lua <<EOF
 require'nvim-treesitter.configs'.setup {
-  ensure_installed = "c",     -- one of "all", "language", or a list of languages
+  ensure_installed = {"c", "cpp", "rust", "python", "bash", "javascript", "json", "html"},
     highlight = {
-        enable = true              -- false will disable the whole extension
+        enable = true
 	}
 }
 
+-- require'nvim_lsp'.clangd.setup{}
 EOF
-" lua <<EOF
-" require'nvim-treesitter.configs'.setup {
-"   ensure_installed = {"c", "cpp", "rust", "python", "bash", "javascript", "json", "html"},     -- one of "all", "language", or a list of languages
-"     highlight = {
-"         enable = true              -- false will disable the whole extension
-" 	}
-" }
 
-" EOF
+
