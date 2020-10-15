@@ -20,11 +20,24 @@ Plug 'scrooloose/nerdtree', { 'on': 'NERDTreeToggle' }
 
 Plug 'nvim-treesitter/nvim-treesitter'
 
-" Plug 'neovim/nvim-lspconfig'
+Plug 'neovim/nvim-lspconfig'
+
+Plug 'nvim-lua/diagnostic-nvim'
+
+Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+
+Plug 'Shougo/deoplete-lsp'
 
 call plug#end()
 
 set shell=/bin/bash
+
+" Show sign column to prevent disruptive movement from lsp.
+set signcolumn=yes
+
+" Tabs to 4. 8 is too much.
+set tabstop=4
+set shiftwidth=4
 
 " Show line number at line start.
 set number
@@ -86,7 +99,35 @@ require'nvim-treesitter.configs'.setup {
 	}
 }
 
--- require'nvim_lsp'.clangd.setup{}
 EOF
 
+" lua <<EOF
+" require'nvim_lsp'.clangd.setup{on_attach=require'diagnostic'.on_attach}
+" EOF
 
+" let leader = " "
+
+" nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
+" nnoremap <silent> K     <cmd>lua vim.lsp.buf.hover()<CR>
+" nnoremap <silent> gD    <cmd>lua vim.lsp.buf.implementation()<CR>
+" nnoremap <silent> <c-k> <cmd>lua vim.lsp.buf.signature_help()<CR>
+" nnoremap <silent> 1gD   <cmd>lua vim.lsp.buf.type_definition()<CR>
+" nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
+" nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
+" nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
+" nnoremap <silent> gd    <cmd>lua vim.lsp.buf.declaration()<CR>
+" nnoremap <silent> gn    <cmd>NextDiagnosticCycle<CR>
+" nnoremap <silent> gN    <cmd>PrevDiagnosticCycleCR>
+
+" " Do not show popup diagnostics in insert mode https://github.com/nvim-lua/diagnostic-nvim
+" " Doesn't work?
+" " let g:diagnostic_insert_delay = 1
+
+" " autocmd Filetype cpp setl omnifunc=v:lua.vim.lsp.omnifunc
+" " autocmd Filetype c setl omnifunc=v:lua.vim.lsp.omnifunc
+
+" " Use deoplete.
+" let g:deoplete#enable_at_startup = 1
+
+" " <TAB>: completion. https://github.com/Shougo/deoplete.nvim/issues/302#issuecomment-231567927
+" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
