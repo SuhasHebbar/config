@@ -24,13 +24,23 @@ Plug 'neovim/nvim-lspconfig'
 
 Plug 'nvim-lua/diagnostic-nvim'
 
-Plug 'Shougo/deoplete.nvim', { 'do': ':UpdateRemotePlugins' }
+" Extensions to built-in LSP, for example, providing type inlay hints
+" Plug 'tjdevries/lsp_extensions.nvim'
 
-Plug 'Shougo/deoplete-lsp'
+" Autocompletion framework for built-in LSP
+Plug 'nvim-lua/completion-nvim'
+
+" match/pair paranthesis.
+Plug 'Raimondi/delimitMate'
+" Alternative option
+" Plug 'jiangmiao/auto-pairs'
 
 call plug#end()
 
 set shell=/bin/bash
+
+" Ctrl+S to save
+nnoremap <C-s> :w<cr>
 
 " Show sign column to prevent disruptive movement from lsp.
 set signcolumn=yes
@@ -38,6 +48,10 @@ set signcolumn=yes
 " Tabs to 4. 8 is too much.
 set tabstop=4
 set shiftwidth=4
+
+" Ignore case in search
+set ignorecase
+
 
 " Show line number at line start.
 set number
@@ -50,7 +64,11 @@ set mouse=a
 set backspace=indent,eol,start
 
 " In some vim installations syntax highlighting may not be enabled.
-syntax on
+syntax enable
+
+" Enable filetype plugin and indent file.
+filetype plugin indent on
+
 
 " https://github.com/microsoft/WSL/issues/4440 WSL2 clipboard not shared
 " between Linux and Windows
@@ -101,33 +119,89 @@ require'nvim-treesitter.configs'.setup {
 
 EOF
 
-" lua <<EOF
-" require'nvim_lsp'.clangd.setup{on_attach=require'diagnostic'.on_attach}
-" EOF
+" Set completeopt to have a better completion experience
+" :help completeopt
+" menuone: popup even when there's only one match
+" noinsert: Do not insert text until a selection is made
+" noselect: Do not select, force user to select one from the menu
+set completeopt=menuone,noinsert,noselect
 
-" let leader = " "
+" Avoid showing extra messages when using completion
+set shortmess+=c
 
-" nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
-" nnoremap <silent> K     <cmd>lua vim.lsp.buf.hover()<CR>
-" nnoremap <silent> gD    <cmd>lua vim.lsp.buf.implementation()<CR>
-" nnoremap <silent> <c-k> <cmd>lua vim.lsp.buf.signature_help()<CR>
-" nnoremap <silent> 1gD   <cmd>lua vim.lsp.buf.type_definition()<CR>
-" nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
-" nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
-" nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
-" nnoremap <silent> gd    <cmd>lua vim.lsp.buf.declaration()<CR>
-" nnoremap <silent> gn    <cmd>NextDiagnosticCycle<CR>
-" nnoremap <silent> gN    <cmd>PrevDiagnosticCycleCR>
 
-" " Do not show popup diagnostics in insert mode https://github.com/nvim-lua/diagnostic-nvim
-" " Doesn't work?
-" " let g:diagnostic_insert_delay = 1
+lua <<EOF
+-- nvim_lsp object
+local nvim_lsp = require'nvim_lsp'
 
-" " autocmd Filetype cpp setl omnifunc=v:lua.vim.lsp.omnifunc
-" " autocmd Filetype c setl omnifunc=v:lua.vim.lsp.omnifunc
+-- function to attach completion and diagnostics
+-- when setting up lsp
+local on_attach = function(client)
+    require'completion'.on_attach(client)
+	require'diagnostic'.on_attach(client)
+end
 
-" " Use deoplete.
-" let g:deoplete#enable_at_startup = 1
+nvim_lsp.clangd.setup({on_attach=on_attach})
+nvim_lsp.rust_analyzer.setup({on_attach=on_attach})
 
-" " <TAB>: completion. https://github.com/Shougo/deoplete.nvim/issues/302#issuecomment-231567927
-" inoremap <expr><TAB>  pumvisible() ? "\<C-n>" : "\<TAB>"
+EOF
+
+" Use <Tab> and <S-Tab> to navigate through popup menu
+" Source: https://github.com/nvim-lua/completion-nvim
+inoremap <expr> <Tab>   pumvisible() ? "\<C-n>" : "\<Tab>"
+inoremap <expr> <S-Tab> pumvisible() ? "\<C-p>" : "\<S-Tab>"
+
+" Code nav setup from :h lsp
+" With minor changes
+nnoremap <silent> <c-]> <cmd>lua vim.lsp.buf.definition()<CR>
+nnoremap <silent> K     <cmd>lua vim.lsp.buf.hover()<CR>
+nnoremap <silent> gd    <cmd>lua vim.lsp.buf.implementation()<CR>
+nnoremap <silent> <c-k> <cmd>lua vim.lsp.buf.signature_help()<CR>
+nnoremap <silent> 1gD   <cmd>lua vim.lsp.buf.type_definition()<CR>
+nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
+nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
+nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
+nnoremap <silent> gD    <cmd>lua vim.lsp.buf.declaration()<CR>
+
+
+" Move to next/prev diagnostic
+nnoremap <silent> gn    <cmd>NextDiagnosticCycle<CR>
+nnoremap <silent> gN    <cmd>PrevDiagnosticCycleCR>
+
+" Should show prompt for code action in echo message area.
+nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
+
+" Enable type inlay hints
+" Disabling since they don't seem to always be accurate and are too
+" distracting. They don't appear right next to the variable they are
+" hinting at but instead appear at end of line.
+" autocmd CursorMoved,InsertLeave,BufEnter,BufWinEnter,TabEnter,BufWritePost *
+" \ lua require'lsp_extensions'.inlay_hints{ prefix = '', highlight = "Comment" }
+
+" Visualize diagnostics
+let g:diagnostic_enable_virtual_text = 1
+let g:diagnostic_trimmed_virtual_text = '40'
+" Don't show diagnostics while in insert mode
+let g:diagnostic_insert_delay = 1
+
+" Set updatetime for CursorHold
+" 300ms of no cursor movement to trigger CursorHold
+" set updatetime=300
+" Show diagnostic popup on cursor hold
+" Too distracting
+" autocmd CursorHold * lua vim.lsp.util.show_line_diagnostics()
+
+
+" See https://github.com/nvim-lua/diagnostic-nvim/blob/f6e1c74d3f486fced13dd9c22972416cc08b9721/plugin/diagnostic.vim
+" for default options if configuration not set by user
+" Undocumented feature as per https://github.com/nvim-lua/diagnostic-nvim/issues/13#issuecomment-621255399
+let g:diagnostic_level = 'Error'
+
+" DelimitMate <cr> expansion
+let delimitMate_expand_cr = 1
+
+let completion_confirm_key = "\<Plug>delimitMateCR"
+		
+
+" References
+" https://sharksforarms.dev/posts/neovim-rust/
