@@ -22,8 +22,6 @@ Plug 'nvim-treesitter/nvim-treesitter'
 
 Plug 'neovim/nvim-lspconfig'
 
-Plug 'nvim-lua/diagnostic-nvim'
-
 " Extensions to built-in LSP, for example, providing type inlay hints
 " Plug 'tjdevries/lsp_extensions.nvim'
 
@@ -34,6 +32,9 @@ Plug 'nvim-lua/completion-nvim'
 Plug 'Raimondi/delimitMate'
 " Alternative option
 " Plug 'jiangmiao/auto-pairs'
+
+" Auto set file indent with :DetectIndent
+Plug 'ciaranm/detectindent'
 
 call plug#end()
 
@@ -73,14 +74,7 @@ filetype plugin indent on
 " https://github.com/microsoft/WSL/issues/4440 WSL2 clipboard not shared
 " between Linux and Windows
 " WSL yank support
-let s:win_clip = '/mnt/c/Windows/System32/clip.exe'  " change this path
-" according to your mount point
-if executable(s:win_clip)
-	augroup WSLYank
-		autocmd!
-		autocmd TextYankPost * if v:event.operator ==# 'y' | call system(s:win_clip, @0) | endif
-	augroup END
-endif
+set clipboard=unnamedplus
 
 "" vim-airline config source: https://web.archive.org/web/20200905075813/https://joshldavis.com/2014/04/05/vim-tab-madness-buffers-vs-tabs/
 " Enable the list of buffers
@@ -131,18 +125,17 @@ set shortmess+=c
 
 
 lua <<EOF
--- nvim_lsp object
-local nvim_lsp = require'nvim_lsp'
+-- lspconfig object
+local lspconfig = require'lspconfig'
 
--- function to attach completion and diagnostics
+-- function to attach completion. 
 -- when setting up lsp
 local on_attach = function(client)
     require'completion'.on_attach(client)
-	require'diagnostic'.on_attach(client)
 end
 
-nvim_lsp.clangd.setup({on_attach=on_attach})
-nvim_lsp.rust_analyzer.setup({on_attach=on_attach})
+lspconfig.clangd.setup({on_attach=on_attach})
+lspconfig.rust_analyzer.setup({on_attach=on_attach})
 
 EOF
 
@@ -162,11 +155,12 @@ nnoremap <silent> gr    <cmd>lua vim.lsp.buf.references()<CR>
 nnoremap <silent> g0    <cmd>lua vim.lsp.buf.document_symbol()<CR>
 nnoremap <silent> gW    <cmd>lua vim.lsp.buf.workspace_symbol()<CR>
 nnoremap <silent> gD    <cmd>lua vim.lsp.buf.declaration()<CR>
+nnoremap <silent> <A-S-f>    <cmd>lua vim.lsp.buf.formatting()<CR>
 
 
 " Move to next/prev diagnostic
-nnoremap <silent> gn    <cmd>NextDiagnosticCycle<CR>
-nnoremap <silent> gN    <cmd>PrevDiagnosticCycleCR>
+nnoremap <silent> gn    <cmd>lua vim.lsp.diagnostic.goto_next()<CR>
+nnoremap <silent> gN    <cmd>lua vim.lsp.diagnostic.goto_prev()CR>
 
 " Should show prompt for code action in echo message area.
 nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
@@ -178,30 +172,39 @@ nnoremap <silent> ga    <cmd>lua vim.lsp.buf.code_action()<CR>
 " autocmd CursorMoved,InsertLeave,BufEnter,BufWinEnter,TabEnter,BufWritePost *
 " \ lua require'lsp_extensions'.inlay_hints{ prefix = '', highlight = "Comment" }
 
-" Visualize diagnostics
-let g:diagnostic_enable_virtual_text = 1
-let g:diagnostic_trimmed_virtual_text = '40'
-" Don't show diagnostics while in insert mode
-let g:diagnostic_insert_delay = 1
+" " Visualize diagnostics
+" let g:diagnostic_enable_virtual_text = 1
+" let g:diagnostic_trimmed_virtual_text = '40'
+" " Don't show diagnostics while in insert mode
+" let g:diagnostic_insert_delay = 1
 
-" Set updatetime for CursorHold
-" 300ms of no cursor movement to trigger CursorHold
-" set updatetime=300
-" Show diagnostic popup on cursor hold
-" Too distracting
-" autocmd CursorHold * lua vim.lsp.util.show_line_diagnostics()
+" " Set updatetime for CursorHold
+" " 300ms of no cursor movement to trigger CursorHold
+" " set updatetime=300
+" " Show diagnostic popup on cursor hold
+" " Too distracting
+" " autocmd CursorHold * lua vim.lsp.util.show_line_diagnostics()
 
 
-" See https://github.com/nvim-lua/diagnostic-nvim/blob/f6e1c74d3f486fced13dd9c22972416cc08b9721/plugin/diagnostic.vim
-" for default options if configuration not set by user
-" Undocumented feature as per https://github.com/nvim-lua/diagnostic-nvim/issues/13#issuecomment-621255399
-let g:diagnostic_level = 'Error'
+" " See https://github.com/nvim-lua/diagnostic-nvim/blob/f6e1c74d3f486fced13dd9c22972416cc08b9721/plugin/diagnostic.vim
+" " for default options if configuration not set by user
+" " Undocumented feature as per https://github.com/nvim-lua/diagnostic-nvim/issues/13#issuecomment-621255399
+" let g:diagnostic_level = 'Error'
 
 " DelimitMate <cr> expansion
 let delimitMate_expand_cr = 1
 
 let completion_confirm_key = "\<Plug>delimitMateCR"
-		
 
+
+" detectindent
+" https://www.vim.org/scripts/script.php?script_id=1171
+autocmd BufReadPost * :DetectIndent
+
+" Set comment type to // for c, c++ and java
+" https://github.com/tpope/tpope/blob/c0af0f5ecb6f26d98e668bf1a81617e918952274/.vimrc#L482
+" https://github.com/tpope/vim-commentary/issues/15
+autocmd FileType c,cpp,java          setlocal commentstring=//\ %s
+		
 " References
 " https://sharksforarms.dev/posts/neovim-rust/
