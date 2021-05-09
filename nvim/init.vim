@@ -141,7 +141,7 @@ autocmd FileType c,cpp,java setlocal commentstring=//\ %s
 " References
 " https://sharksforarms.dev/posts/neovim-rust/
 
-let mapleader = " "
+let mapleader = "\<space>"
 
 
 " Based on coc.nvim settings reference src:https://github.com/neoclide/coc.nvim
@@ -311,7 +311,8 @@ nnoremap <silent><nowait> <space>p  :<C-u>CocListResume<CR>
 
 let g:coc_global_extensions = ['coc-json', 'coc-clangd', 'coc-pyright', 'coc-rust-analyzer', 'coc-tsserver']
 
-highlight CocFloating ctermbg=black
+highlight Pmenu ctermbg=DarkGrey ctermfg=white
+highlight CocFloating ctermbg=DarkGrey
 
 " Set .json filetype to jsonc
 " https://github.com/neoclide/coc-json/issues/27#issuecomment-702873855
@@ -325,3 +326,8 @@ augroup END
 nnoremap <c-s> :update<cr>
 inoremap <c-s> <c-o>:update<cr>
 vnoremap <c-s> <c-c>:update<cr>
+
+" Disable quote autoclosing for ' in rust since unclosed ' is also used for
+" lifetimes.
+autocmd FileType rust let b:delimitMate_quotes = "\""
+
