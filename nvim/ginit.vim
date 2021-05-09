@@ -26,3 +26,8 @@ endif
 nnoremap <silent><RightMouse> :call GuiShowContextMenu()<CR>
 inoremap <silent><RightMouse> <Esc>:call GuiShowContextMenu()<CR>
 vnoremap <silent><RightMouse> :call GuiShowContextMenu()<CR>gv
+
+highlight Pmenu guibg=#333333 guifg=white
+highlight CocFloating guibg=#333333
+
+let $MYGVIMRC = stdpath('config') .. '/ginit.vim'
