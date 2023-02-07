@@ -1,6 +1,0 @@
-{
-	"workspace.progressTarget": "statusline",
-	"clangd.semanticHighlighting": true,
-	"python.linting.mypyEnabled": true,
-	"python.formatting.provider": "black",
-}
