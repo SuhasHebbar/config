@@ -1,4 +1,5 @@
-vim.g.mapleader = "<space>"
+-- TODO: Remove. Defined later. May not be necessary.
+-- vim.g.mapleader = "<space>"
 
 local win32 = vim.fn.has('win32') == 1
 local is_gui = vim.fn.exists('g:GuiLoaded')
@@ -439,6 +440,16 @@ local servers = {
   rust_analyzer = {},
   -- tsserver = {},
 }
+
+-- gopls installation needs go installed.
+if not vim.fn.executable('go') then
+  servers.gopls = nil
+end
+
+-- Pyright LSP installations needs npm available.
+if not vim.fn.executable('npm') then
+  servers.pyright = nil
+end
 
 -- Setup neovim lua configuration
 require('neodev').setup()
