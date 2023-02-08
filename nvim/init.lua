@@ -442,12 +442,12 @@ local servers = {
 }
 
 -- gopls installation needs go installed.
-if not vim.fn.executable('go') then
+if vim.fn.executable('go') ~= 1 then
   servers.gopls = nil
 end
 
 -- Pyright LSP installations needs npm available.
-if not vim.fn.executable('npm') then
+if vim.fn.executable('npm') ~= 1 then
   servers.pyright = nil
 end
 
