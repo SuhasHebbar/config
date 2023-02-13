@@ -162,6 +162,9 @@ vim.wo.signcolumn = 'yes'
 vim.o.termguicolors = true
 vim.o.background = 'dark'
 
+-- Hide vim welcome screen
+vim.o.shm = vim.o.shm .. 'I'
+
 require('tokyonight').setup({
   style = 'night',
   on_colors = function(colors)
