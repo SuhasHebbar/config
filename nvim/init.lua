@@ -429,15 +429,12 @@ end
 -- Setup mason so it can manage external tooling
 require('mason').setup()
 
-local shellcheck_install_path
 do
   local Registry = require('mason-registry')
   local shellcheck = Registry.get_package('shellcheck')
   if not shellcheck:is_installed() then
     shellcheck:install({})
   end
-
-  shellcheck_install_path = shellcheck:get_install_path()
 end
 
 -- Enable the following language servers
@@ -483,14 +480,6 @@ local servers = {
     },
 }
 
-servers_autostart = {}
-for k, _v in pairs(servers) do
-  servers_autostart[k] = true
-end
-
--- Do not autostart the following servers. We want opening lua or sh file to be quick and lightweight by default.
-servers_autostart.lua_ls = false
--- servers_autostart.bashls = false
 
 -- gopls installation needs go installed.
 if vim.fn.executable('go') ~= 1 then
@@ -500,7 +489,18 @@ end
 -- Pyright LSP installations needs npm available.
 if vim.fn.executable('npm') ~= 1 then
   servers.pyright = nil
+  servers.bashls = nil
 end
+
+servers_autostart = {}
+for k, _v in pairs(servers) do
+  servers_autostart[k] = true
+end
+
+-- Do not autostart the following servers. We want opening lua or sh file to be quick and lightweight by default.
+-- servers_autostart.bashls = false
+servers_autostart.lua_ls = false
+
 
 -- Setup neovim lua configuration
 require('neodev').setup()
