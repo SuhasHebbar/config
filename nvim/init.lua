@@ -1,8 +1,22 @@
 -- TODO: Remove. Defined later. May not be necessary.
 -- vim.g.mapleader = "<space>"
-
 local win32 = vim.fn.has('win32') == 1
 local is_gui = vim.fn.exists('g:GuiLoaded')
+
+local mason_path = vim.fn.stdpath('data') .. '/mason'
+local mason_bin_path = mason_path .. '/bin'
+
+local function get_os_path(unixish_path)
+  if win32 then
+    return string.gsub(unixish_path, '/', '\\')
+  end
+  return unixish_path
+end
+
+local mason_cmd_suffix = ''
+if win32 then
+  mason_cmd_suffix  = '.cmd'
+end
 
 -- Install packer
 local install_path = vim.fn.stdpath 'data' .. '/site/pack/packer/start/packer.nvim'
@@ -412,6 +426,20 @@ local on_attach = function(c, bufnr, setup_inlay_hints)
   end, { desc = 'Format current buffer with LSP' })
 end
 
+-- Setup mason so it can manage external tooling
+require('mason').setup()
+
+local shellcheck_install_path
+do
+  local Registry = require('mason-registry')
+  local shellcheck = Registry.get_package('shellcheck')
+  if not shellcheck:is_installed() then
+    shellcheck:install({})
+  end
+
+  shellcheck_install_path = shellcheck:get_install_path()
+end
+
 -- Enable the following language servers
 --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
 --
@@ -441,8 +469,28 @@ local servers = {
     },
   },
   rust_analyzer = {},
-  -- tsserver = {},
+  bashls = {
+    bashIde = {
+      shellcheckPath = mason_bin_path .. '/shellcheck' .. mason_cmd_suffix
+    },
+  },
+  tsserver = {},
+  lua_ls = {
+      Lua = {
+        workspace = { checkThirdParty = false },
+        telemetry = { enable = false },
+      },
+    },
 }
+
+servers_autostart = {}
+for k, _v in pairs(servers) do
+  servers_autostart[k] = true
+end
+
+-- Do not autostart the following servers. We want opening lua or sh file to be quick and lightweight by default.
+servers_autostart.lua_ls = false
+-- servers_autostart.bashls = false
 
 -- gopls installation needs go installed.
 if vim.fn.executable('go') ~= 1 then
@@ -461,18 +509,6 @@ require('neodev').setup()
 local capabilities = vim.lsp.protocol.make_client_capabilities()
 capabilities = require('cmp_nvim_lsp').default_capabilities(capabilities)
 
--- Setup mason so it can manage external tooling
-require('mason').setup()
-
-local mason_path = vim.fn.stdpath('data') .. '/mason'
-local mason_bin_path = mason_path .. '/bin'
-
-local mason_cmd_suffix = ''
-if win32 then
-  mason_cmd_suffix  = '.cmd'
-end
-
-
 -- Ensure the servers above are installed
 local mason_lspconfig = require 'mason-lspconfig'
 
@@ -480,8 +516,8 @@ mason_lspconfig.setup {
   ensure_installed = vim.tbl_keys(servers),
 }
 
-local function setup_sumneko()
-  require('lspconfig').sumneko_lua.setup {
+local function setup_lua_ls()
+  require('lspconfig').lua_ls.setup {
     autostart=false,
     capabilities = capabilities,
     on_attach = on_attach,
@@ -498,10 +534,9 @@ local function setup_rust_tools()
     local rt = require("rust-tools")
     local codelldb_path = mason_bin_path .. '/codelldb' .. mason_cmd_suffix
 
-    local liblldb_path
     if win32 then
       -- codelldb crashes if you pass linux style paths to --liblldb hence we sanitize.
-      liblldb_path = string.gsub(mason_path .. '/packages/codelldb/extension/lldb/bin/liblldb.dll', '/', '\\')
+      liblldb_path = get_os_path(mason_path .. '/packages/codelldb/extension/lldb/bin/liblldb.dll')
     else
       liblldb_path = mason_path .. '/packages/codelldb/extension/lldb/lib/liblldb.so'
     end
@@ -539,13 +574,13 @@ end
 mason_lspconfig.setup_handlers {
   function(server_name)
     require('lspconfig')[server_name].setup {
+      autostart = servers_autostart[server_name],
       capabilities = capabilities,
       on_attach = on_attach,
       settings = servers[server_name],
     }
   end,
   rust_analyzer = setup_rust_tools,
-  sumneko_lua = setup_sumneko
 }
 
 -- Turn on lsp status information
