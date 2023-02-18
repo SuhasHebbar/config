@@ -1,7 +1,7 @@
 return { -- Highlight, edit, and navigate code
     'nvim-treesitter/nvim-treesitter',
     lazy = true,
-    event = LazyVimStarted,
+    event = 'VeryLazy',
     dependencies = {
       'nvim-treesitter/nvim-treesitter-textobjects',
     },

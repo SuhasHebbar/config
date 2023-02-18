@@ -19,7 +19,7 @@ return {
   -- NOTE: Yes, you can install new plugins here!
   'mfussenegger/nvim-dap',
   lazy = true,
-  event = LazyVimStarted,
+  event = 'VeryLazy',
 
   -- NOTE: And you can specify dependencies as well
   dependencies = {
@@ -33,8 +33,6 @@ return {
 
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
-
-    -- 'nvim-telescope/telescope.nvim',
   },
 
   config = function()
@@ -149,8 +147,6 @@ return {
     dap.configurations.c = dap.configurations.cpp
 
     require('dap.ext.vscode').load_launchjs()
-
-    -- require('telescope').load_extension('dap')
 
   end,
 }
