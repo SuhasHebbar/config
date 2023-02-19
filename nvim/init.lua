@@ -1,3 +1,4 @@
+vim.lsp.set_log_level("debug")
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
@@ -284,50 +285,6 @@ vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
 vim.keymap.set('n', '<leader>e', vim.diagnostic.open_float)
 vim.keymap.set('n', '<leader>q', vim.diagnostic.setloclist)
 
--- nvim-cmp setup
-local cmp = require 'cmp'
-local luasnip = require 'luasnip'
-luasnip.config.setup({})
-
-cmp.setup {
-  snippet = {
-    expand = function(args)
-      luasnip.lsp_expand(args.body)
-    end,
-  },
-  mapping = cmp.mapping.preset.insert {
-    ['<C-d>'] = cmp.mapping.scroll_docs( -4),
-    ['<C-f>'] = cmp.mapping.scroll_docs(4),
-    ['<C-Space>'] = cmp.mapping.complete({}),
-    ['<CR>'] = cmp.mapping.confirm {
-      behavior = cmp.ConfirmBehavior.Replace,
-      select = true,
-    },
-    ['<Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_next_item()
-      elseif luasnip.expand_or_jumpable() then
-        luasnip.expand_or_jump()
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-    ['<S-Tab>'] = cmp.mapping(function(fallback)
-      if cmp.visible() then
-        cmp.select_prev_item()
-      elseif luasnip.jumpable( -1) then
-        luasnip.jump( -1)
-      else
-        fallback()
-      end
-    end, { 'i', 's' }),
-  },
-  sources = {
-    { name = 'nvim_lsp' },
-    { name = 'luasnip' },
-  },
-}
-
 vim.env.MYLUARC = vim.fn.stdpath('config') .. '/init.lua'
 vim.wo.relativenumber = true
 -- vim.wo.backspace = 'indent,eol,start'
@@ -433,18 +390,6 @@ vim.api.nvim_create_autocmd({ 'BufReadPost' }, { pattern = { '*' }, command = 'D
 -- Shortcut to format file and detect indent.
 vim.keymap.set('n', '<leader>e', ':Format<cr> <bar> :DetectIndent<cr>')
 
-require 'cmp'.setup {
-  sources = {
-    { name = 'path' }
-  }
-}
-
-require('cmp').setup({
-  sources = {
-    { name = 'buffer' },
-  },
-})
-
 vim.api.nvim_create_user_command('H', function(opts)
   vim.cmd.help(opts.args)
   vim.cmd.only()
@@ -463,3 +408,61 @@ if win32 then
   ]])
 end
 
+-- Help command that opens help in a new persistent full screen buffer
+vim.api.nvim_create_user_command('H', function(opts)
+  local ok, result = pcall(vim.cmd.help, opts.args)
+  if ok then
+    local helpfile = vim.api.nvim_buf_get_name(0)
+    vim.cmd.helpclose()
+    vim.cmd('silent noautocmd keepalt e ' .. helpfile)
+  elseif type(result) == 'string' then
+    vim.api.nvim_err_writeln(result)
+  end
+end, { nargs = '*' })
+
+
+
+-- nvim-cmp setup
+local cmp = require 'cmp'
+local luasnip = require 'luasnip'
+
+luasnip.config.setup {}
+
+cmp.setup {
+  snippet = {
+    expand = function(args)
+      luasnip.lsp_expand(args.body)
+    end,
+  },
+  mapping = cmp.mapping.preset.insert {
+    ['<C-d>'] = cmp.mapping.scroll_docs( -4),
+    ['<C-f>'] = cmp.mapping.scroll_docs(4),
+    ['<C-Space>'] = cmp.mapping.complete {},
+    ['<CR>'] = cmp.mapping.confirm {
+      behavior = cmp.ConfirmBehavior.Replace,
+      select = true,
+    },
+    ['<Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_next_item()
+      elseif luasnip.expand_or_jumpable() then
+        luasnip.expand_or_jump()
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+    ['<S-Tab>'] = cmp.mapping(function(fallback)
+      if cmp.visible() then
+        cmp.select_prev_item()
+      elseif luasnip.jumpable( -1) then
+        luasnip.jump( -1)
+      else
+        fallback()
+      end
+    end, { 'i', 's' }),
+  },
+  sources = {
+    { name = 'nvim_lsp' },
+    { name = 'luasnip' },
+  },
+}
