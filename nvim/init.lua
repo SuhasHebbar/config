@@ -72,17 +72,15 @@ require('lazy').setup({
       options = {
         -- icons_enabled = false,
         theme = 'gruvbox',
-        component_separators = '|',
-        section_separators = '',
       },
       tabline = {
-        lualine_a = { { 'buffers', buffers_color = { active = { bg = '#ffffff' }, }, }, },
+        lualine_a = { { 'buffers', buffers_color = { active = { bg = '#ffffff' }, }, symbols = { alternate_file = '' } }, },
       },
       sections = {
         lualine_a = { 'mode' },
         lualine_b = { 'branch', 'diff',
           { 'diagnostics', sources = { 'nvim_lsp', 'nvim_diagnostic', 'nvim_workspace_diagnostic', }, colored = true,
-            always_visible = true } },
+            always_visible = false } },
         lualine_c = { 'filename' },
         lualine_x = { 'encoding', 'fileformat', 'filetype' },
         lualine_y = { 'progress' },
@@ -113,9 +111,8 @@ require('lazy').setup({
     end,
   },
   require('plugins.treesitter_setup'),
-  { 'scrooloose/nerdtree',   cmd = 'NERDTreeToggle' },
   -- #Theme
-  { 'folke/tokyonight.nvim', lazy = false,          priority = 1000 },
+  { 'folke/tokyonight.nvim',     lazy = false, priority = 1000 },
   -- Auto insert matching brackets
   {
     "windwp/nvim-autopairs",
@@ -131,6 +128,28 @@ require('lazy').setup({
   'hrsh7th/cmp-buffer',
   { 'simrat39/inlay-hints.nvim', opts = {} },
   'simrat39/rust-tools.nvim',
+  {
+    "nvim-neo-tree/neo-tree.nvim",
+    cmd = 'Neotree',
+    version = "*",
+    dependencies = {
+      "nvim-lua/plenary.nvim",
+      { "nvim-tree/nvim-web-devicons", opts = {} }, -- not strictly required, but recommended
+      "MunifTanjim/nui.nvim",
+    },
+    config = function()
+      -- Unless you are still migrating, remove the deprecated commands from v1.x
+      vim.cmd([[ let g:neo_tree_remove_legacy_commands = 1 ]])
+
+      require('neo-tree').setup({
+        window = {
+          mappings = {
+            ["o"] = "open",
+          }
+        }
+      })
+    end,
+  }
 }, { defaults = { lazy = false, }, })
 
 -- [[ Setting options ]]
@@ -256,6 +275,7 @@ vim.keymap.set('n', '<leader>sh', require('telescope.builtin').help_tags, { desc
 vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { desc = '[S]earch current [W]ord' })
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
+vim.keymap.set('n', '<leader>sk', require('telescope.builtin').keymaps, { desc = '[S]earch [K]eymaps' })
 
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
@@ -324,7 +344,7 @@ vim.keymap.set('n', '<C-S-Tab>', ':bprevious!<cr>', {})
 
 vim.keymap.set('n', '<C-w>', ':bp <BAR> bd! #<CR>', {})
 
-vim.keymap.set('n', '<C-b>', ':NERDTreeToggle<CR>')
+vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>')
 
 
 -- require("dapui").setup({
@@ -408,3 +428,9 @@ require('cmp').setup({
     { name = 'buffer' },
   },
 })
+
+vim.api.nvim_create_user_command('H', function(opts)
+  vim.cmd.help(opts.args)
+  vim.cmd.only()
+  -- vim.cmd('help ' .. opts.args .. ' | only')
+end, { nargs = '*' })
