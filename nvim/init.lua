@@ -11,7 +11,7 @@ local mason_bin_path = mason_path .. '/bin'
 local mason_cmd_suffix = ''
 
 if win32 then
-  mason_cmd_suffix  = '.cmd'
+  mason_cmd_suffix = '.cmd'
 end
 
 -- Install package manager
@@ -51,7 +51,7 @@ require('lazy').setup({
     dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip' },
   },
   -- Useful plugin to show you pending keybinds.
-  { 'folke/which-key.nvim', opts = {} },
+  { 'folke/which-key.nvim',          opts = {} },
   { -- Adds git releated signs to the gutter, as well as utilities for managing changes
     'lewis6991/gitsigns.nvim',
     opts = {
@@ -98,9 +98,9 @@ require('lazy').setup({
       char = '┊',
       show_trailing_blankline_indent = false,
     },
-  -- "gc" to comment visual regions/lines
-  { 'numToStr/Comment.nvim', opts = {} }, },
-{ 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-dap.nvim'} },
+    -- "gc" to comment visual regions/lines
+    { 'numToStr/Comment.nvim', opts = {} }, },
+  { 'nvim-telescope/telescope.nvim', version = '*', dependencies = { 'nvim-lua/plenary.nvim', 'nvim-telescope/telescope-dap.nvim' } },
 
   -- Fuzzy Finder Algorithm which requires local dependencies to be built.
   -- Only load if `cmake` is available. Make sure you have the system
@@ -113,9 +113,9 @@ require('lazy').setup({
     end,
   },
   require('plugins.treesitter_setup'),
-  { 'scrooloose/nerdtree', cmd = 'NERDTreeToggle' },
+  { 'scrooloose/nerdtree',   cmd = 'NERDTreeToggle' },
   -- #Theme
-  {'folke/tokyonight.nvim', lazy = false, priority = 1000},
+  { 'folke/tokyonight.nvim', lazy = false,          priority = 1000 },
   -- Auto insert matching brackets
   {
     "windwp/nvim-autopairs",
@@ -124,15 +124,14 @@ require('lazy').setup({
   -- Auto set file indent with :DetectIndent
   'ciaranm/detectindent',
 
-  -- nvim-cmp source for filesystem paths. 
+  -- nvim-cmp source for filesystem paths.
   'hrsh7th/cmp-path',
 
   -- nvim-cmp source for local buffer keywords.
   'hrsh7th/cmp-buffer',
-  {'simrat39/inlay-hints.nvim', opts = {}},
+  { 'simrat39/inlay-hints.nvim', opts = {} },
   'simrat39/rust-tools.nvim',
-
-}, {defaults = { lazy = false, }, })
+}, { defaults = { lazy = false, }, })
 
 -- [[ Setting options ]]
 -- See `:help vim.o`
@@ -182,7 +181,7 @@ require('tokyonight').setup({
     highlights.MiniStatuslineModeNormal.bg = '#fceea7'
   end,
 })
-vim.cmd[[colorscheme tokyonight]]
+vim.cmd [[colorscheme tokyonight]]
 
 -- Set completeopt to have a better completion experience
 vim.o.completeopt = 'menuone,noselect'
@@ -258,8 +257,6 @@ vim.keymap.set('n', '<leader>sw', require('telescope.builtin').grep_string, { de
 vim.keymap.set('n', '<leader>sg', require('telescope.builtin').live_grep, { desc = '[S]earch by [G]rep' })
 vim.keymap.set('n', '<leader>sd', require('telescope.builtin').diagnostics, { desc = '[S]earch [D]iagnostics' })
 
-require('telescope').load_extension('dap')
-
 -- Diagnostic keymaps
 vim.keymap.set('n', '[d', vim.diagnostic.goto_prev)
 vim.keymap.set('n', ']d', vim.diagnostic.goto_next)
@@ -278,7 +275,7 @@ cmp.setup {
     end,
   },
   mapping = cmp.mapping.preset.insert {
-    ['<C-d>'] = cmp.mapping.scroll_docs(-4),
+    ['<C-d>'] = cmp.mapping.scroll_docs( -4),
     ['<C-f>'] = cmp.mapping.scroll_docs(4),
     ['<C-Space>'] = cmp.mapping.complete({}),
     ['<CR>'] = cmp.mapping.confirm {
@@ -297,8 +294,8 @@ cmp.setup {
     ['<S-Tab>'] = cmp.mapping(function(fallback)
       if cmp.visible() then
         cmp.select_prev_item()
-      elseif luasnip.jumpable(-1) then
-        luasnip.jump(-1)
+      elseif luasnip.jumpable( -1) then
+        luasnip.jump( -1)
       else
         fallback()
       end
@@ -395,12 +392,12 @@ vim.keymap.set('n', '<C-b>', ':NERDTreeToggle<CR>')
 
 -- detectindent
 -- https://www.vim.org/scripts/script.php?script_id=1171
-vim.api.nvim_create_autocmd({'BufReadPost'}, {pattern = {'*'}, command = 'DetectIndent'})
+vim.api.nvim_create_autocmd({ 'BufReadPost' }, { pattern = { '*' }, command = 'DetectIndent' })
 
 -- Shortcut to format file and detect indent.
 vim.keymap.set('n', '<leader>e', ':Format<cr> <bar> :DetectIndent<cr>')
 
-require'cmp'.setup {
+require 'cmp'.setup {
   sources = {
     { name = 'path' }
   }
@@ -411,4 +408,3 @@ require('cmp').setup({
     { name = 'buffer' },
   },
 })
-

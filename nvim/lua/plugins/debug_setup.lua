@@ -1,12 +1,5 @@
-local win32 = vim.fn.has('win32') == 1
+local u = require('utils')
 
-local mason_path = vim.fn.stdpath('data') .. '/mason'
-local mason_bin_path = mason_path .. '/bin'
-local mason_cmd_suffix = ''
-
-if win32 then
-  mason_cmd_suffix  = '.cmd'
-end
 -- debug.lua
 --
 -- Shows how to use the DAP plugin to debug your code.
@@ -18,14 +11,12 @@ end
 return {
   -- NOTE: Yes, you can install new plugins here!
   'mfussenegger/nvim-dap',
-  lazy = true,
   event = 'VeryLazy',
-
   -- NOTE: And you can specify dependencies as well
   dependencies = {
     -- Creates a beautiful debugger UI
-    {'rcarriga/nvim-dap-ui', commit = '8ba36d8479522e374939674379806710712cb47a'},
-    { 'theHamsta/nvim-dap-virtual-text', opts = {}},
+    'rcarriga/nvim-dap-ui',
+    { 'theHamsta/nvim-dap-virtual-text', opts = {} },
 
     -- Installs the debug adapters for you
     'williamboman/mason.nvim',
@@ -33,8 +24,9 @@ return {
 
     -- Add your own debuggers here
     'leoluz/nvim-dap-go',
+    'jbyuki/one-small-step-for-vimkind',
+    'nvim-telescope/telescope.nvim',
   },
-
   config = function()
     local dap = require 'dap'
     local dapui = require 'dapui'
@@ -77,8 +69,8 @@ return {
         icons = {
           pause = '⏸',
           play = '▶',
-          step_into = '⏎',
-          step_over = '⏭',
+          step_into = '⏭',
+          step_over = '⏎',
           step_out = '⏮',
           step_back = 'b',
           run_last = '▶▶',
@@ -101,7 +93,7 @@ return {
     dap.adapters.cppdbg = {
       id = 'cppdbg',
       type = 'executable',
-      command = mason_bin_path .. '/OpenDebugAD7' .. mason_cmd_suffix,
+      command = u.mason_bin_path .. '/OpenDebugAD7' .. u.mason_cmd_suffix,
       options = {
         detached = false,
       },
@@ -111,8 +103,8 @@ return {
       type = 'server',
       port = "${port}",
       executable = {
-        command = mason_bin_path .. '/codelldb' .. mason_cmd_suffix,
-        args = {"--port", "${port}"},
+        command = u.mason_bin_path .. '/codelldb' .. u.mason_cmd_suffix,
+        args = { "--port", "${port}" },
 
         -- On windows you may have to uncomment this:
         detached = false,
@@ -146,7 +138,30 @@ return {
     -- If you want to use this for Rust and C, add something like this:
     dap.configurations.c = dap.configurations.cpp
 
-    require('dap.ext.vscode').load_launchjs()
+    dap.configurations.lua = {
+      {
+        type = 'nlua',
+        request = 'attach',
+        name = "Attach to running Neovim instance",
+      }
+    }
 
+    local osv_default_port = 8086
+    local osv_default_host = "127.0.0.1"
+
+    dap.adapters.nlua = function(callback, config)
+      callback({ type = 'server', host = config.host or osv_default_host, port = config.port or osv_default_port})
+    end
+
+    vim.api.nvim_create_user_command('Osv', function(opts)
+      local port = osv_default_port
+      if type(opts.fargs[1]) == 'number' then
+        port = opts.fargs[1]
+      end
+
+      require('osv').launch({ port = port, host = osv_default_host })
+    end, {})
+
+    require('dap.ext.vscode').load_launchjs()
   end,
 }

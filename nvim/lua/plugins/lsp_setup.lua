@@ -1,25 +1,9 @@
-local win32 = vim.fn.has('win32') == 1
+local u = require('utils')
 
-local function get_os_path(unixish_path)
-  if win32 then
-    return string.gsub(unixish_path, '/', '\\')
-  end
-  return unixish_path
-end
-
-
-local mason_path = vim.fn.stdpath('data') .. '/mason'
-local mason_bin_path = mason_path .. '/bin'
-local mason_cmd_suffix = ''
-
-if win32 then
-  mason_cmd_suffix  = '.cmd'
-end
-
-local M = { -- LSP Configuration & Plugins
+local M = {
+-- LSP Configuration & Plugins
   'neovim/nvim-lspconfig',
-  -- lazy = true,
-  -- event = 'VeryLazy',
+  event = { "BufReadPre", "BufNewFile" },
   dependencies = {
     -- Automatically install LSPs to stdpath for neovim
     'williamboman/mason.nvim',
@@ -27,7 +11,7 @@ local M = { -- LSP Configuration & Plugins
 
     -- Useful status updates for LSP
     -- NOTE: `opts = {}` is the same as calling `require('fidget').setup({})`
-    {'j-hui/fidget.nvim', opts = {}},
+    { 'j-hui/fidget.nvim', opts = {} },
 
     -- Additional lua configuration, makes nvim stuff amazing
     { 'folke/neodev.nvim', config = true },
@@ -35,58 +19,57 @@ local M = { -- LSP Configuration & Plugins
 }
 
 function M.config()
+  -- LSP settings.
+  --  This function gets run when an LSP connects to a particular buffer.
+  local on_attach = function(c, bufnr, setup_inlay_hints)
+    -- NOTE: Remember that lua is a real programming language, and as such it is possible
+    -- to define small helper and utility functions so you don't have to repeat yourself
+    -- many times.
+    --
+    -- In this case, we create a function that lets us more easily define mappings specific
+    -- for LSP related items. It sets the mode, buffer and description for us each time.
+    local nmap = function(keys, func, desc)
+      if desc then
+        desc = 'LSP: ' .. desc
+      end
 
--- LSP settings.
---  This function gets run when an LSP connects to a particular buffer.
-local on_attach = function(c, bufnr, setup_inlay_hints)
-  -- NOTE: Remember that lua is a real programming language, and as such it is possible
-  -- to define small helper and utility functions so you don't have to repeat yourself
-  -- many times.
-  --
-  -- In this case, we create a function that lets us more easily define mappings specific
-  -- for LSP related items. It sets the mode, buffer and description for us each time.
-  local nmap = function(keys, func, desc)
-    if desc then
-      desc = 'LSP: ' .. desc
+      vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
     end
 
-    vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
+    setup_inlay_hints = setup_inlay_hints or false
+
+    if setup_inlay_hints then
+      require('inlay-hints').on_attach(c, bufnr)
+    end
+
+
+    nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
+    nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
+
+    nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
+    nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
+    nmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
+    nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
+    nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
+    nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
+
+    -- See `:help K` for why this keymap
+    nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
+    nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
+
+    -- Lesser used LSP functionality
+    nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
+    nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
+    nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
+    nmap('<leader>wl', function()
+      print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
+    end, '[W]orkspace [L]ist Folders')
+
+    -- Create a command `:Format` local to the LSP buffer
+    vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
+      vim.lsp.buf.format()
+    end, { desc = 'Format current buffer with LSP' })
   end
-
-  setup_inlay_hints = setup_inlay_hints or false
-
-  if setup_inlay_hints then
-    require('inlay-hints').on_attach(c, bufnr)
-  end
-
-
-  nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
-  nmap('<leader>ca', vim.lsp.buf.code_action, '[C]ode [A]ction')
-
-  nmap('gd', vim.lsp.buf.definition, '[G]oto [D]efinition')
-  nmap('gr', require('telescope.builtin').lsp_references, '[G]oto [R]eferences')
-  nmap('gI', vim.lsp.buf.implementation, '[G]oto [I]mplementation')
-  nmap('<leader>D', vim.lsp.buf.type_definition, 'Type [D]efinition')
-  nmap('<leader>ds', require('telescope.builtin').lsp_document_symbols, '[D]ocument [S]ymbols')
-  nmap('<leader>ws', require('telescope.builtin').lsp_dynamic_workspace_symbols, '[W]orkspace [S]ymbols')
-
-  -- See `:help K` for why this keymap
-  nmap('K', vim.lsp.buf.hover, 'Hover Documentation')
-  nmap('<C-k>', vim.lsp.buf.signature_help, 'Signature Documentation')
-
-  -- Lesser used LSP functionality
-  nmap('gD', vim.lsp.buf.declaration, '[G]oto [D]eclaration')
-  nmap('<leader>wa', vim.lsp.buf.add_workspace_folder, '[W]orkspace [A]dd Folder')
-  nmap('<leader>wr', vim.lsp.buf.remove_workspace_folder, '[W]orkspace [R]emove Folder')
-  nmap('<leader>wl', function()
-    print(vim.inspect(vim.lsp.buf.list_workspace_folders()))
-  end, '[W]orkspace [L]ist Folders')
-
-  -- Create a command `:Format` local to the LSP buffer
-  vim.api.nvim_buf_create_user_command(bufnr, 'Format', function(_)
-    vim.lsp.buf.format()
-  end, { desc = 'Format current buffer with LSP' })
-end
 
 
 
@@ -98,27 +81,27 @@ end
 
 
 
--- Setup mason so it can manage external tooling
-require('mason').setup()
+  -- Setup mason so it can manage external tooling
+  require('mason').setup()
 
-do
-  local Registry = require('mason-registry')
-  local shellcheck = Registry.get_package('shellcheck')
-  if not shellcheck:is_installed() then
-    shellcheck:install({})
+  do
+    local Registry = require('mason-registry')
+    local shellcheck = Registry.get_package('shellcheck')
+    if not shellcheck:is_installed() then
+      shellcheck:install({})
+    end
   end
-end
 
--- Enable the following language servers
---  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
---
---  Add any additional override configuration in the following tables. They will be passed to
---  the `settings` field of the server config. You must look up that documentation yourself.
-local servers = {
-  clangd = {},
-  gopls = {
+  -- Enable the following language servers
+  --  Feel free to add/remove any LSPs that you want here. They will automatically be installed.
+  --
+  --  Add any additional override configuration in the following tables. They will be passed to
+  --  the `settings` field of the server config. You must look up that documentation yourself.
+  local servers = {
+    clangd = {},
     gopls = {
-      hints = {
+      gopls = {
+        hints = {
           assignVariableTypes = true,
           compositeLiteralFields = true,
           compositeLiteralTypes = true,
@@ -126,87 +109,95 @@ local servers = {
           functionTypeParameters = true,
           parameterNames = true,
           rangeVariableTypes = true,
+        },
       },
     },
-  },
-  pyright = {
     pyright = {
-      inlayHints = {
-        functionReturnTypes = true,
-        variableTypes = true
+      pyright = {
+        inlayHints = {
+          functionReturnTypes = true,
+          variableTypes = true
+        },
       },
     },
-  },
-  rust_analyzer = {},
-  bashls = {
-    bashIde = {
-      shellcheckPath = mason_bin_path .. '/shellcheck' .. mason_cmd_suffix
+    rust_analyzer = {},
+    bashls = {
+      bashIde = {
+        shellcheckPath = u.mason_bin_path .. '/shellcheck' .. u.mason_cmd_suffix
+      },
     },
-  },
-  tsserver = {},
-  lua_ls = {
+    tsserver = {},
+    lua_ls = {
       Lua = {
         workspace = { checkThirdParty = false },
         telemetry = { enable = false },
       },
     },
-}
+  }
 
 
--- gopls installation needs go installed.
-if vim.fn.executable('go') ~= 1 then
-  servers.gopls = nil
-end
+  -- gopls installation needs go installed.
+  if vim.fn.executable('go') ~= 1 then
+    servers.gopls = nil
+  end
 
--- Pyright LSP installations needs npm available.
-if vim.fn.executable('npm') ~= 1 then
-  servers.pyright = nil
-  servers.bashls = nil
-end
+  -- Pyright LSP installations needs npm available.
+  if vim.fn.executable('npm') ~= 1 then
+    servers.pyright = nil
+    servers.bashls = nil
+  end
 
-local servers_autostart = {}
-for k, _v in pairs(servers) do
-  servers_autostart[k] = true
-end
+  local servers_autostart = {}
+  for k, _v in pairs(servers) do
+    servers_autostart[k] = true
+  end
 
--- Do not autostart the following servers. We want opening lua or sh file to be quick and lightweight by default.
--- servers_autostart.bashls = false
--- servers_autostart.lua_ls = false
+  -- Do not autostart the following servers. We want opening lua or sh file to be quick and lightweight by default.
+  -- servers_autostart.bashls = false
+  -- Autostart lua ls if current working directory in nvim config dir
+  servers_autostart.lua_ls = vim.fn.getcwd() == vim.fn.stdpath('config')
 
--- Ensure the servers above are installed
-local mason_lspconfig = require 'mason-lspconfig'
+  -- Ensure the servers above are installed
+  local mason_lspconfig = require 'mason-lspconfig'
 
-mason_lspconfig.setup {
-  ensure_installed = vim.tbl_keys(servers),
-}
+  mason_lspconfig.setup {
+    ensure_installed = vim.tbl_keys(servers),
+  }
 
-local function setup_rust_tools()
+  local function setup_rust_tools()
     local rt = require("rust-tools")
-    local codelldb_path = mason_bin_path .. '/codelldb' .. mason_cmd_suffix
+    local codelldb_path = u.mason_bin_path .. '/codelldb' .. u.mason_cmd_suffix
     local liblldb_path
 
-    if win32 then
+    if u.win32 then
       -- codelldb crashes if you pass linux style paths to --liblldb hence we sanitize.
-      liblldb_path = get_os_path(mason_path .. '/packages/codelldb/extension/lldb/bin/liblldb.dll')
+      liblldb_path = u.get_os_path(u.mason_path .. '/packages/codelldb/extension/lldb/bin/liblldb.dll')
     else
-      liblldb_path = mason_path .. '/packages/codelldb/extension/lldb/lib/liblldb.so'
+      liblldb_path = u.mason_path .. '/packages/codelldb/extension/lldb/lib/liblldb.so'
     end
 
     local opts = {
       dap = {
         adapter = require('rust-tools.dap').get_codelldb_adapter(
-            codelldb_path, liblldb_path)
+          codelldb_path, liblldb_path)
       },
       -- Stuff in server goes into lspconfig.setup I think.
       server = {
-        capabilities=capabilities,
+        root_dir = function(...)
+          local lspconfig_ra = require('lspconfig.server_configurations.rust_analyzer')
+          local lspconfig_util = require('lspconfig.util')
+          local unsanitized_rootdir = lspconfig_ra.default_config.root_dir(...)
+          return lspconfig_util.path.sanitize(unsanitized_rootdir)
+        end,
+        capabilities = capabilities,
         on_attach = function(c, bufnr)
           on_attach(c, bufnr, false)
 
           -- Hover actions
           vim.keymap.set("n", 'K', rt.hover_actions.hover_actions, { buffer = bufnr, desc = 'LSP: Hover Documentation' })
           -- Code action groups
-          vim.keymap.set("n", "<leader>ca", rt.code_action_group.code_action_group, { buffer = bufnr, desc = 'LSP: [C]ode [A]ction' })
+          vim.keymap.set("n", "<leader>ca", rt.code_action_group.code_action_group,
+            { buffer = bufnr, desc = 'LSP: [C]ode [A]ction' })
         end,
         settings = {
           ['rust-analyzer'] = {
@@ -220,23 +211,19 @@ local function setup_rust_tools()
     }
 
     rt.setup(opts)
-    print('rust!')
-end
+  end
 
-mason_lspconfig.setup_handlers {
-  function(server_name)
-    require('lspconfig')[server_name].setup {
-      autostart = servers_autostart[server_name],
-      capabilities = capabilities,
-      on_attach = on_attach,
-      settings = servers[server_name],
-    }
-  end,
-  rust_analyzer = setup_rust_tools,
-}
-
-print('success')
-
+  mason_lspconfig.setup_handlers {
+    function(server_name)
+      require('lspconfig')[server_name].setup {
+        autostart = servers_autostart[server_name],
+        capabilities = capabilities,
+        on_attach = on_attach,
+        settings = servers[server_name],
+      }
+    end,
+    rust_analyzer = setup_rust_tools,
+  }
 end
 
 return M
