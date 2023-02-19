@@ -346,6 +346,21 @@ vim.keymap.set('n', '<C-w>', ':bp <BAR> bd! #<CR>', {})
 
 vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>')
 
+-- Handle terminal mode shenanigans
+-- 't' to set mapping for terminal mode. <C-\><C-N> to leave terminal mode and
+-- enter back to normal mode which we then follow with normal mode buffer change commands.
+vim.keymap.set('t', '<M-2>', '<C-\\><C-N> :bnext!<cr>', { noremap = true })
+vim.keymap.set('t', '<M-1>', '<C-\\><C-N> :bprevious!<cr>', { noremap = true })
+
+vim.keymap.set('t', '<Esc>', '<C-\\><C-N>', { noremap = true })
+
+-- BufEnter event doesn't seem to be triggered when the terminal opens so we also include TermOpen.
+-- We need BufEnter since alt tabbing away from the terminal puts it back to normal mode
+vim.api.nvim_create_autocmd({ 'TermOpen', 'BufEnter' }, {
+  pattern = { 'term://*' },
+  command = 'startinsert',
+})
+
 
 -- require("dapui").setup({
 --   -- Expand lines larger than the window
