@@ -149,7 +149,8 @@ require('lazy').setup({
         }
       })
     end,
-  }
+  },
+  "samjwill/nvim-unception",
 }, { defaults = { lazy = false, }, })
 
 -- [[ Setting options ]]
@@ -349,8 +350,8 @@ vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>')
 -- Handle terminal mode shenanigans
 -- 't' to set mapping for terminal mode. <C-\><C-N> to leave terminal mode and
 -- enter back to normal mode which we then follow with normal mode buffer change commands.
-vim.keymap.set('t', '<M-2>', '<C-\\><C-N> :bnext!<cr>', { noremap = true })
-vim.keymap.set('t', '<M-1>', '<C-\\><C-N> :bprevious!<cr>', { noremap = true })
+vim.keymap.set('t', '<M-2>', '<C-\\><C-N>:bnext!<cr>', { noremap = true })
+vim.keymap.set('t', '<M-1>', '<C-\\><C-N>:bprevious!<cr>', { noremap = true })
 
 vim.keymap.set('t', '<Esc>', '<C-\\><C-N>', { noremap = true })
 
@@ -449,3 +450,16 @@ vim.api.nvim_create_user_command('H', function(opts)
   vim.cmd.only()
   -- vim.cmd('help ' .. opts.args .. ' | only')
 end, { nargs = '*' })
+
+-- Source :help shell-powershell & https://github.com/neovim/neovim/issues/11437
+-- To fix issues in :terminal when using powershell on windows
+if win32 then
+  vim.cmd([[
+    let &shell = executable('pwsh') ? 'pwsh' : 'powershell'
+    let &shellcmdflag = '-NoLogo -NoProfile -ExecutionPolicy RemoteSigned -Command [Console]::InputEncoding=[Console]::OutputEncoding=[System.Text.Encoding]::UTF8;'
+    let &shellredir = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+    let &shellpipe = '2>&1 | Out-File -Encoding UTF8 %s; exit $LastExitCode'
+    set shellquote= shellxquote=
+  ]])
+end
+
