@@ -1,4 +1,3 @@
-vim.lsp.set_log_level("debug")
 -- Set <space> as the leader key
 -- See `:help mapleader`
 --  NOTE: Must happen before plugins are required (otherwise wrong leader will be used)
@@ -291,7 +290,7 @@ vim.wo.relativenumber = true
 vim.o.clipboard = 'unnamedplus'
 vim.o.completeopt = 'menuone,noinsert,noselect'
 
-vim.keymap.set('n', '<C-s>', ':w<cr>', {})
+vim.keymap.set({ 'n', 'i' }, '<C-s>', vim.cmd.write, {})
 vim.keymap.set('n', '<C-t>', ':enew<cr>', {})
 
 vim.keymap.set('n', '<M-2>', ':bnext!<cr>', {})
@@ -429,6 +428,7 @@ local luasnip = require 'luasnip'
 luasnip.config.setup {}
 
 cmp.setup {
+  preselect = cmp.PreselectMode.None,
   snippet = {
     expand = function(args)
       luasnip.lsp_expand(args.body)
