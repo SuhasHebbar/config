@@ -48,8 +48,17 @@ return {
     -- see mason-nvim-dap README for more information
     require('mason-nvim-dap').setup_handlers()
 
+    local continue = function()
+      if vim.fn.filereadable('.vscode/launch.json') then
+        require('dap.ext.vscode').load_launchjs(nil, {
+          codelldb = { 'cpp', 'c' },
+        })
+      end
+      require('dap').continue()
+    end
+
     -- Basic debugging keymaps, feel free to change to your liking!
-    vim.keymap.set('n', '<F5>', dap.continue)
+    vim.keymap.set('n', '<F5>', continue)
     vim.keymap.set('n', '<F1>', dap.step_into)
     vim.keymap.set('n', '<F2>', dap.step_over)
     vim.keymap.set('n', '<F3>', dap.step_out)
@@ -185,7 +194,5 @@ return {
 
       require('osv').launch({ port = port, host = osv_default_host })
     end, {})
-
-    require('dap.ext.vscode').load_launchjs()
   end,
 }
