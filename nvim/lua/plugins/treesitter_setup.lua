@@ -10,7 +10,10 @@ return {
     local nti = require('nvim-treesitter.install')
     nti.compilers = { "clang", "gcc" }
     nti.prefet_git = false
-    pcall(nti.update { with_sync = true })
+    -- On slow networks I think this line was causing a lot of issues.
+    -- Prevented you from quitting while this was ongoing, plus the 
+    -- messages are irritating.
+    -- pcall(nti.update { with_sync = true })
 
 
     --  Configure Treesitter
