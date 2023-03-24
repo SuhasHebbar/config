@@ -126,7 +126,7 @@ require('lazy').setup({
 
   -- nvim-cmp source for local buffer keywords.
   'hrsh7th/cmp-buffer',
-  { 'simrat39/inlay-hints.nvim', opts = {} },
+  { 'lvimuser/lsp-inlayhints.nvim', opts = {} },
   'simrat39/rust-tools.nvim',
   {
     "nvim-neo-tree/neo-tree.nvim",

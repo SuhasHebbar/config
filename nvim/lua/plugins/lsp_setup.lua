@@ -31,7 +31,7 @@ function M.config()
         hints = {
           assignVariableTypes = true,
           compositeLiteralFields = true,
-          compositeLiteralTypes = true,
+          compositeLiteralTypes = false,
           constantValues = true,
           functionTypeParameters = true,
           parameterNames = true,
@@ -110,7 +110,7 @@ function M.config()
 
   -- LSP settings.
   --  This function gets run when an LSP connects to a particular buffer.
-  local on_attach = function(c, bufnr, setup_inlay_hints)
+  local on_attach = function(_, bufnr)
     -- NOTE: Remember that lua is a real programming language, and as such it is possible
     -- to define small helper and utility functions so you don't have to repeat yourself
     -- many times.
@@ -123,12 +123,6 @@ function M.config()
       end
 
       vim.keymap.set('n', keys, func, { buffer = bufnr, desc = desc })
-    end
-
-    setup_inlay_hints = setup_inlay_hints or false
-
-    if setup_inlay_hints then
-      require('inlay-hints').on_attach(c, bufnr)
     end
 
     nmap('<leader>rn', vim.lsp.buf.rename, '[R]e[n]ame')
@@ -186,7 +180,7 @@ function M.config()
         end,
         capabilities = capabilities,
         on_attach = function(c, bufnr)
-          on_attach(c, bufnr, false)
+          on_attach(c, bufnr)
 
           -- Hover actions
           vim.keymap.set("n", 'K', rt.hover_actions.hover_actions, { buffer = bufnr, desc = 'LSP: Hover Documentation' })
@@ -207,6 +201,25 @@ function M.config()
 
     rt.setup(opts)
   end
+
+  vim.api.nvim_create_augroup("LspAttach_inlayhints", {})
+  vim.api.nvim_create_autocmd("LspAttach", {
+    group = "LspAttach_inlayhints",
+    callback = function(args)
+      -- We let rust-tools.nvim handle inlay hints for go.
+      if vim.bo.filetype == 'rust' then
+        return
+      end
+
+      if not (args.data and args.data.client_id) then
+        return
+      end
+
+      local bufnr = args.buf
+      local client = vim.lsp.get_client_by_id(args.data.client_id)
+      require("lsp-inlayhints").on_attach(client, bufnr)
+    end,
+  })
 
   mason_lspconfig.setup_handlers {
     function(server_name)
