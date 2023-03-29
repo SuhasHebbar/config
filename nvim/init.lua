@@ -290,16 +290,21 @@ vim.wo.relativenumber = true
 vim.o.clipboard = 'unnamedplus'
 vim.o.completeopt = 'menuone,noinsert,noselect'
 
+local tabnew_command = ':enew<cr>'
+local tabnext_command = ':bnext!<cr>'
+local tabprev_command = ':bprevious!<cr>'
+local tabclose_command = ':bp <BAR> bd! #<CR>'
+
 vim.keymap.set({ 'n', 'i' }, '<C-s>', vim.cmd.write, {})
-vim.keymap.set('n', '<C-t>', ':enew<cr>', {})
+vim.keymap.set('n', '<C-t>', tabnew_command, {})
 
-vim.keymap.set('n', '<M-2>', ':bnext!<cr>', {})
-vim.keymap.set('n', '<C-Tab>', ':bnext!<cr>', {})
+vim.keymap.set('n', '<M-2>', tabnext_command, {})
+vim.keymap.set('n', '<C-Tab>', tabnext_command, {})
 
-vim.keymap.set('n', '<M-1>', ':bprevious!<cr>', {})
-vim.keymap.set('n', '<C-S-Tab>', ':bprevious!<cr>', {})
+vim.keymap.set('n', '<M-1>', tabprev_command, {})
+vim.keymap.set('n', '<C-S-Tab>', tabprev_command, {})
 
-vim.keymap.set('n', '<C-w>', ':bp <BAR> bd! #<CR>', {})
+vim.keymap.set('n', '<C-w>', tabclose_command, {})
 
 vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>')
 
