@@ -89,8 +89,16 @@ require('lazy').setup({
   {
     'akinsho/bufferline.nvim',
     opts = {
+      highlights = {
+        buffer_selected = {
+          bg = 'grey'
+        },
+        close_button_selected = {
+          bg = 'grey'
+        },
+      },
       options = {
-        separator_style = 'thick',
+        separator_style = {'', '',},
       },
     },
     version = "*",
