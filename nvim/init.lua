@@ -73,9 +73,7 @@ require('lazy').setup({
         -- icons_enabled = false,
         theme = 'gruvbox',
       },
-      tabline = {
-        lualine_a = { { 'buffers', buffers_color = { active = { bg = '#ffffff' }, }, symbols = { alternate_file = '' } }, },
-      },
+      tabline = {},
       sections = {
         lualine_a = { 'mode' },
         lualine_b = { 'branch', 'diff',
@@ -87,6 +85,16 @@ require('lazy').setup({
         lualine_z = { 'location' }
       },
     }
+  },
+  {
+    'akinsho/bufferline.nvim',
+    opts = {
+      options = {
+        separator_style = 'thick',
+      },
+    },
+    version = "*",
+    dependencies = { 'nvim-tree/nvim-web-devicons', }
   },
   { -- Add indentation guides even on blank lines
     'lukas-reineke/indent-blankline.nvim',
@@ -112,7 +120,7 @@ require('lazy').setup({
   },
   require('plugins.treesitter_setup'),
   -- #Theme
-  { 'folke/tokyonight.nvim',     lazy = false, priority = 1000 },
+  { 'folke/tokyonight.nvim',        lazy = false, priority = 1000 },
   -- Auto insert matching brackets
   {
     "windwp/nvim-autopairs",
@@ -291,18 +299,22 @@ vim.o.clipboard = 'unnamedplus'
 vim.o.completeopt = 'menuone,noinsert,noselect'
 
 local tabnew_command = ':enew<cr>'
-local tabnext_command = ':bnext!<cr>'
-local tabprev_command = ':bprevious!<cr>'
+local tabnext_command = ':BufferLineCycleNext<cr>'
+local tabprev_command = ':BufferLineCyclePrev<cr>'
 local tabclose_command = ':bp <BAR> bd! #<CR>'
+local tab_shift_next_command = ':BufferLineMoveNext<CR>'
+local tab_shift_prev_command = ':BufferLineMovePrev<CR>'
 
 vim.keymap.set({ 'n', 'i' }, '<C-s>', vim.cmd.write, {})
 vim.keymap.set('n', '<C-t>', tabnew_command, {})
 
 vim.keymap.set('n', '<M-2>', tabnext_command, {})
 vim.keymap.set('n', '<C-Tab>', tabnext_command, {})
+vim.keymap.set('n', '<M-4>', tab_shift_next_command, {})
 
 vim.keymap.set('n', '<M-1>', tabprev_command, {})
 vim.keymap.set('n', '<C-S-Tab>', tabprev_command, {})
+vim.keymap.set('n', '<M-3>', tab_shift_prev_command, {})
 
 vim.keymap.set('n', '<C-w>', tabclose_command, {})
 
