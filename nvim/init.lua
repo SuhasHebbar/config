@@ -44,12 +44,13 @@ require('lazy').setup({
   'tpope/vim-rhubarb',
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
-  require('plugins.lsp_setup'), 
+  require('plugins.lsp_setup'),
   require('plugins.debug_setup'),
   {
     -- Autocompletion
     'hrsh7th/nvim-cmp',
-    dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip', "rafamadriz/friendly-snippets" },
+    dependencies = { 'hrsh7th/cmp-nvim-lsp', 'L3MON4D3/LuaSnip', 'saadparwaiz1/cmp_luasnip',
+      "rafamadriz/friendly-snippets" },
   },
   -- Useful plugin to show you pending keybinds.
   { 'folke/which-key.nvim',  opts = {} },
@@ -326,27 +327,37 @@ vim.wo.relativenumber = true
 vim.o.clipboard = 'unnamedplus'
 vim.o.completeopt = 'menuone,noinsert,noselect'
 
-local tabnew_command = ':enew<cr>'
-local tabnext_command = ':BufferLineCycleNext<cr>'
-local tabprev_command = ':BufferLineCyclePrev<cr>'
-local tabclose_command = ':bp <BAR> bd! #<CR>'
-local tab_shift_next_command = ':BufferLineMoveNext<CR>'
-local tab_shift_prev_command = ':BufferLineMovePrev<CR>'
+local wrap_cmd = function(cmd)
+  return function()
+    vim.cmd(cmd)
+  end
+end
 
-vim.keymap.set({ 'n', 'i' }, '<C-s>', vim.cmd.write, {})
-vim.keymap.set('n', '<C-t>', tabnew_command, {})
+local tabnew_command = wrap_cmd('enew')
+local tabnext_command = wrap_cmd('BufferLineCycleNext')
+local tabprev_command = wrap_cmd('BufferLineCyclePrev')
+local tabclose_command = wrap_cmd('bp | bd! #')
+local tab_shift_next_command = wrap_cmd('BufferLineMoveNext')
+local tab_shift_prev_command = wrap_cmd('BufferLineMovePrev')
+local neotree_toggle_command = wrap_cmd('Neotree toggle')
 
-vim.keymap.set('n', '<M-2>', tabnext_command, {})
-vim.keymap.set('n', '<C-Tab>', tabnext_command, {})
-vim.keymap.set('n', '<M-4>', tab_shift_next_command, {})
+local modes = { 'n', 'i', 't' }
+for _, mode in pairs(modes) do
+  vim.keymap.set(mode, '<C-s>', vim.cmd.write, {})
+  vim.keymap.set(mode, '<C-t>', tabnew_command, {})
 
-vim.keymap.set('n', '<M-1>', tabprev_command, {})
-vim.keymap.set('n', '<C-S-Tab>', tabprev_command, {})
-vim.keymap.set('n', '<M-3>', tab_shift_prev_command, {})
+  vim.keymap.set(mode, '<M-2>', tabnext_command, {})
+  vim.keymap.set(mode, '<C-Tab>', tabnext_command, {})
+  vim.keymap.set(mode, '<M-4>', tab_shift_next_command, {})
 
-vim.keymap.set('n', '<C-w>', tabclose_command, {})
+  vim.keymap.set(mode, '<M-1>', tabprev_command, {})
+  vim.keymap.set(mode, '<C-S-Tab>', tabprev_command, {})
+  vim.keymap.set(mode, '<M-3>', tab_shift_prev_command, {})
 
-vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>')
+  vim.keymap.set(mode, '<C-w>', tabclose_command, {})
+
+  vim.keymap.set(mode, '<C-b>', neotree_toggle_command, {})
+end
 
 -- Handle terminal mode shenanigans
 -- 't' to set mapping for terminal mode. <C-\><C-N> to leave terminal mode and
@@ -354,7 +365,10 @@ vim.keymap.set('n', '<C-b>', ':Neotree toggle<CR>')
 vim.keymap.set('t', '<M-2>', '<C-\\><C-N>:bnext!<cr>', { noremap = true })
 vim.keymap.set('t', '<M-1>', '<C-\\><C-N>:bprevious!<cr>', { noremap = true })
 
-vim.keymap.set('t', '<Esc>', '<C-\\><C-N>', { noremap = true })
+-- Terminal mode starts in insert mode. We disable using escape to go to normal mode.
+-- The SHELL's vim keybinding should work better despite being incomplete as they also
+-- let you delete text.
+-- vim.keymap.set('t', '<Esc>', '<C-\\><C-N>', { noremap = true })
 
 -- BufEnter event doesn't seem to be triggered when the terminal opens so we also include TermOpen.
 -- We need BufEnter since alt tabbing away from the terminal puts it back to normal mode
