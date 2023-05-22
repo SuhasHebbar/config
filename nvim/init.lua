@@ -44,7 +44,7 @@ require('lazy').setup({
   'tpope/vim-rhubarb',
   -- Detect tabstop and shiftwidth automatically
   'tpope/vim-sleuth',
-  require('plugins.lsp_setup'),
+  require('plugins.lsp_setup'), 
   require('plugins.debug_setup'),
   {
     -- Autocompletion

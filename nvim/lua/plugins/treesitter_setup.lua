@@ -1,5 +1,5 @@
 return {
--- Highlight, edit, and navigate code
+  -- Highlight, edit, and navigate code
   'nvim-treesitter/nvim-treesitter',
   build = ":TSUpdate",
   event = { "BufReadPost", "BufNewFile" },
@@ -11,7 +11,7 @@ return {
     nti.compilers = { "clang", "gcc" }
     nti.prefet_git = false
     -- On slow networks I think this line was causing a lot of issues.
-    -- Prevented you from quitting while this was ongoing, plus the 
+    -- Prevented you from quitting while this was ongoing, plus the
     -- messages are irritating.
     -- pcall(nti.update { with_sync = true })
 
@@ -20,7 +20,17 @@ return {
     -- See `:help nvim-treesitter`
     require('nvim-treesitter.configs').setup {
       -- Add languages to be installed here that you want installed for treesitter
-      ensure_installed = { 'c', 'cpp', 'go', 'lua', 'vim', 'python', 'rust', 'typescript', 'vimdoc', 'bash', 'html', 'css', 'java', 'javascript', 'json', 'json5', 'make', 'markdown', 'proto', 'toml' },
+      ensure_installed = { 'c', 'cpp', 'go', 'lua', 'vim', 'python', 'rust', 'typescript', 'vimdoc', 'bash', 'html',
+        'css', 'java', 'javascript', 'json', 'json5', 'make', 'markdown', 'proto', 'toml' },
+
+      disable = function(_lang, buf)
+        -- Disable treesitter for large files.
+        local max_filesize = 100 * 1024 -- 100 KB
+        local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
+        if ok and stats and stats.size > max_filesize then
+          return true
+        end
+      end,
 
       highlight = { enable = true },
       indent = { enable = true, disable = { 'python' } },

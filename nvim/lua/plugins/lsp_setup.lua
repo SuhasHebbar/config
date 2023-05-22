@@ -15,6 +15,13 @@ local M = {
 
     -- Additional lua configuration, makes nvim stuff amazing
     { 'folke/neodev.nvim',       config = true },
+    {
+      'jose-elias-alvarez/null-ls.nvim',
+      config = function()
+
+      end,
+      dependencies = { 'nvim-lua/plenary.nvim' }
+    },
   },
 }
 
@@ -201,6 +208,15 @@ function M.config()
 
     rt.setup(opts)
   end
+
+  local null_ls = require("null-ls")
+
+  -- Nothing for now. I had tried to use this for shellcheck, but it doesn't offer to fix the error, just disable shellcheck for that line.
+  null_ls.setup({
+    sources = {},
+    on_attach = on_attach,
+  })
+
 
   vim.api.nvim_create_augroup("LspAttach_inlayhints", {})
   vim.api.nvim_create_autocmd("LspAttach", {
