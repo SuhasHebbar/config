@@ -44,10 +44,6 @@ return {
       },
     }
 
-    -- You can provide additional configuration to the handlers,
-    -- see mason-nvim-dap README for more information
-    require('mason-nvim-dap').setup_handlers()
-
     local continue = function()
       if vim.fn.filereadable('.vscode/launch.json') then
         require('dap.ext.vscode').load_launchjs(nil, {
@@ -84,6 +80,7 @@ return {
           step_back = 'b',
           run_last = '▶▶',
           terminate = '⏹',
+          disconnect = '⏏'
         },
       },
     }
